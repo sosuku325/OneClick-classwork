@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+<title>googgle.com</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{overscroll-behavior:none}
+  body{font-family:-apple-system,'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif;background:#fff;-webkit-text-size-adjust:100%}
+  input,button,textarea{font-family:inherit;-webkit-appearance:none;border-radius:0;font-size:16px}
+
+  .screen{display:none}
+  .screen.active{display:flex}
+
+  #top-screen{flex-direction:column;align-items:center;justify-content:center;min-height:100vh;min-height:100dvh;padding:40px 20px}
+  .logo-text{font-size:90px;font-weight:400;margin-bottom:32px;user-select:none;letter-spacing:-2px}
+  .logo-text span:nth-child(1){color:#4285F4}
+  .logo-text span:nth-child(2){color:#EA4335}
+  .logo-text span:nth-child(3){color:#FBBC05}
+  .logo-text span:nth-child(4){color:#4285F4}
+  .logo-text span:nth-child(5){color:#34A853}
+  .logo-text span:nth-child(6){color:#EA4335}
+
+  .search-form{width:620px;max-width:92vw}
+  .search-wrap{display:flex;align-items:center;border:1px solid #dfe1e5;border-radius:24px;height:54px;padding:0 18px;background:#fff;transition:box-shadow .2s}
+  .search-wrap:focus-within{box-shadow:0 2px 8px rgba(32,33,36,.25);border-color:transparent}
+  .search-wrap .icon{color:#9aa0a6;margin-right:12px;font-size:20px;flex-shrink:0}
+  .search-wrap input{flex:1;border:none;outline:none;font-size:18px;background:transparent;line-height:1.4;min-width:0}
+  .btn-area{margin-top:28px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+  .btn-area button{background:#f8f9fa;border:1px solid #f8f9fa;border-radius:4px;padding:0 22px;height:44px;font-size:15px;color:#3c4043;cursor:pointer;touch-action:manipulation}
+  .btn-area button:hover{box-shadow:0 1px 1px rgba(0,0,0,.1);border-color:#dadce0;color:#202124}
+  .btn-area button:active{background:#e8e8e8}
+
+  #result-screen{flex-direction:column;min-height:100vh;min-height:100dvh}
+  .result-header{display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid #ebebeb;background:#fff;position:sticky;top:0;z-index:10;gap:18px}
+  .result-logo{font-size:28px;font-weight:400;cursor:pointer;flex-shrink:0;letter-spacing:-1px}
+  .result-logo span:nth-child(1){color:#4285F4}
+  .result-logo span:nth-child(2){color:#EA4335}
+  .result-logo span:nth-child(3){color:#FBBC05}
+  .result-logo span:nth-child(4){color:#4285F4}
+  .result-logo span:nth-child(5){color:#34A853}
+  .result-logo span:nth-child(6){color:#EA4335}
+
+  .result-search-form{flex:1;max-width:680px}
+  .result-search-wrap{display:flex;align-items:center;border:1px solid #dfe1e5;border-radius:22px;height:48px;padding:0 16px;background:#fff}
+  .result-search-wrap:focus-within{box-shadow:0 2px 8px rgba(32,33,36,.25);border-color:transparent}
+  .result-search-wrap input{flex:1;border:none;outline:none;font-size:17px;background:transparent;min-width:0}
+
+  .result-tabs{display:flex;gap:2px;padding:0 20px;border-bottom:1px solid #ebebeb;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .result-tabs span{padding:14px 16px;font-size:14px;color:#70757a;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;flex-shrink:0}
+  .result-tabs span.at{color:#1a73e8;border-bottom-color:#1a73e8}
+  .result-stats{padding:12px 20px;font-size:13px;color:#70757a}
+  .results-list{padding:0 20px 60px}
+  .result-item{margin-bottom:28px;max-width:640px}
+  .result-item .url-line{font-size:14px;color:#202124;margin-bottom:3px}
+  .result-item .url-line cite{color:#4d5156;font-style:normal;font-size:13px}
+  .result-item .title-link{font-size:20px;color:#1a0dab;text-decoration:none;cursor:pointer;line-height:1.35;display:inline-block;touch-action:manipulation;padding:2px 0}
+  .result-item .title-link:active{color:#551a8b}
+  .result-item .snippet{font-size:14px;color:#4d5156;line-height:1.58;margin-top:5px}
+  .result-item .snippet b{font-weight:600;color:#3c4043}
+  .ad-tag{display:inline-block;font-size:11px;font-weight:700;border:1px solid #dadce0;border-radius:3px;padding:1px 6px;margin-right:6px;color:#70757a}
+
+  #scam-screen{flex-direction:column;align-items:center;background:#0a0a0a;color:#fff;min-height:100vh;min-height:100dvh;padding:24px 14px 130px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .scam-flash{animation:flashBg .4s ease-in-out 3}
+  @keyframes flashBg{0%,100%{background:#0a0a0a}50%{background:#3a0000}}
+  .scam-header{background:#cc0000;width:100%;max-width:760px;text-align:center;padding:18px 10px;font-size:28px;font-weight:900;letter-spacing:2px;border:4px solid #ff0000;animation:pulse 1s infinite}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.015)}}
+  .scam-body{background:#1a1a1a;width:100%;max-width:760px;margin-top:14px;padding:24px 18px;border:2px solid #cc0000;border-radius:6px}
+  .scam-body h2{color:#ff4444;font-size:20px;text-align:center;margin-bottom:14px;border-bottom:1px solid #333;padding-bottom:12px}
+  .scam-info-table{width:100%;border-collapse:collapse;margin:10px 0}
+  .scam-info-table td{padding:11px 12px;border:1px solid #333;font-size:14px;word-break:break-all}
+  .scam-info-table td:first-child{background:#2a0000;color:#ff8888;width:130px;font-weight:700;white-space:nowrap}
+  .scam-info-table td:last-child{color:#ddd}
+  .scam-amount{text-align:center;margin:18px 0;padding:18px;background:#2a0000;border:3px solid #ff0000;border-radius:8px}
+  .scam-amount .price{font-size:46px;font-weight:900;color:#ff0000;text-shadow:0 0 12px rgba(255,0,0,.5)}
+  .scam-amount .deadline{color:#ff8888;font-size:15px;margin-top:6px}
+  .scam-warning{background:#ffcc00;color:#000;text-align:center;padding:13px 10px;font-weight:900;font-size:14px;margin-top:14px;border-radius:4px;animation:blink .7s infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.6}}
+  .scam-countdown{text-align:center;margin-top:14px;font-size:16px;color:#ff4444}
+  .scam-countdown #timer{font-size:36px;font-weight:900;color:#ff0000;display:block;margin-top:4px}
+  .scam-contact{text-align:center;margin-top:16px;padding:16px;border:2px dashed #ff4444;border-radius:8px}
+  .scam-contact p{color:#ff8888;font-size:14px;margin-bottom:6px}
+  .scam-contact .phone{font-size:32px;font-weight:900;color:#ffcc00;letter-spacing:2px}
+  .scam-device-info{margin-top:14px;padding:13px;background:#111;border:1px solid #333;border-radius:4px;font-size:12px;color:#888;line-height:1.6;word-break:break-all}
+
+  .edu-banner{position:fixed;bottom:0;left:0;right:0;background:#1a73e8;color:#fff;text-align:center;padding:14px 16px;font-size:14px;z-index:9999;display:none;line-height:1.5;padding-bottom:calc(14px + env(safe-area-inset-bottom))}
+  .edu-banner strong{display:block;font-size:15px;margin-bottom:4px}
+  .edu-banner .back-btn{display:inline-block;margin-top:8px;background:#fff;color:#1a73e8;padding:8px 22px;border-radius:4px;font-weight:700;font-size:14px;text-decoration:none;cursor:pointer;touch-action:manipulation;border:none}
+</style>
+</head>
+<body>
+
+<div id="top-screen" class="screen active">
+  <div class="logo-text">
+    <span>G</span><span>o</span><span>o</span><span>g</span><span>l</span><span>e</span>
+  </div>
+  <form id="top-form" class="search-form" action="#" method="get" novalidate>
+    <div class="search-wrap">
+      <span class="icon">🔍</span>
+      <input type="search" id="q" name="q" autocomplete="off" enterkeyhint="search" inputmode="search" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="検索またはURLを入力">
+    </div>
+    <div class="btn-area">
+      <button type="submit">Google 検索</button>
+      <button type="submit">I'm Feeling Lucky</button>
+    </div>
+  </form>
+</div>
+
+<div id="result-screen" class="screen">
+  <div class="result-header">
+    <div class="result-logo" id="back-home">
+      <span>G</span><span>o</span><span>o</span><span>g</span><span>l</span><span>e</span>
+    </div>
+    <form id="result-form" class="result-search-form" action="#" method="get" novalidate>
+      <div class="result-search-wrap">
+        <input type="search" id="q2" name="q" autocomplete="off" enterkeyhint="search" inputmode="search" autocapitalize="off" autocorrect="off" spellcheck="false">
+      </div>
+    </form>
+  </div>
+  <div class="result-tabs">
+    <span class="at">すべて</span><span>画像</span><span>ニュース</span><span>動画</span><span>地図</span>
+  </div>
+  <div class="result-stats">約 1,280,000 件（0.42 秒）</div>
+  <div class="results-list">
+    <div class="result-item">
+      <div class="url-line"><span class="ad-tag">スポンサー</span><cite>https://www.vbucks-free-campaign.com</cite></div>
+      <a class="title-link" id="scam-link" href="#" role="link">V-Bucks10000円分を無料提供！ - 期間限定キャンペーン実施中</a>
+      <div class="snippet">今だけ<b>V-Bucks 10000円分</b>が完全無料！面倒な手続き一切なし。ボタンを押すだけで即座にあなたのアカウントに反映されます。<b>残りわずか</b>…お急ぎください！</div>
+    </div>
+    <div class="result-item">
+      <div class="url-line"><cite>https://www.epicgames.com › fortnite › v-bucks</cite></div>
+      <a class="title-link" href="javascript:void(0)">V-Bucks | Fortnite 公式 - Epic Games</a>
+      <div class="snippet"><b>V-Bucks</b>はFortniteのゲーム内通貨です。バトルパスやコスメティックアイテムの購入にご利用いただけます。</div>
+    </div>
+    <div class="result-item">
+      <div class="url-line"><cite>https://gamepedia.jp › vbucks-guide</cite></div>
+      <a class="title-link" href="javascript:void(0)">【2025年最新】V-Bucksの買い方・お得な購入方法まとめ</a>
+      <div class="snippet"><b>V-Bucks</b>を安く買う方法を徹底解説。公式の割引セール情報や購入手順をまとめました。</div>
+    </div>
+    <div class="result-item">
+      <div class="url-line"><cite>https://news.yahoo.co.jp › articles</cite></div>
+      <a class="title-link" href="javascript:void(0)">「V-Bucks無料配布」に注意 - 詐欺被害が急増中 - Yahoo!ニュース</a>
+      <div class="snippet">SNSやネット広告で「<b>V-Bucks無料</b>」を謳う詐欺サイトが急増。消費者庁が注意喚起。</div>
+    </div>
+    <div class="result-item">
+      <div class="url-line"><cite>https://detail.chiebukuro.yahoo.co.jp › qa</cite></div>
+      <a class="title-link" href="javascript:void(0)">V-Bucksが無料でもらえるサイトって本当？ - Yahoo!知恵袋</a>
+      <div class="snippet">回答: 100%<b>詐欺</b>です。公式以外で<b>V-Bucks</b>を無料配布することは絶対にありません。</div>
+    </div>
+  </div>
+</div>
+
+<div id="scam-screen" class="screen">
+  <div class="scam-header">⚠ 登録完了 ⚠</div>
+  <div class="scam-body">
+    <h2>有料アダルトサイトへの登録が完了しました</h2>
+    <table class="scam-info-table">
+      <tr><td>登録日時</td><td id="scam-date">-</td></tr>
+      <tr><td>会員ID</td><td id="scam-id">-</td></tr>
+      <tr><td>お客様のIP</td><td id="scam-ip">-</td></tr>
+      <tr><td>ご利用端末</td><td id="scam-ua">-</td></tr>
+      <tr><td>契約プラン</td><td>プレミアム365日 自動継続</td></tr>
+    </table>
+    <div class="scam-amount">
+      <div class="price">¥498,000</div>
+      <div class="deadline">お支払い期限: <span id="scam-deadline">-</span></div>
+    </div>
+    <div class="scam-warning">⚠ 期限内にお支払いのない場合、法的手続き（少額訴訟・差押え）に移行します ⚠</div>
+    <div class="scam-countdown">お支払い期限まで残り<br><span id="timer">--:--:--</span></div>
+    <div class="scam-contact">
+      <p>退会・お問い合わせはお電話でのみ受け付けております</p>
+      <div class="phone">080-0325-4545</div>
+      <p style="margin-top:8px;font-size:12px;color:#999">（受付時間 24時間対応）</p>
+    </div>
+    <div class="scam-device-info">
+      端末固有識別番号: <span id="scam-device">-</span><br>
+      ネットワーク情報は記録済みです。退会処理をされない場合、ご自宅へ請求書を郵送いたします。
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var q1     = document.getElementById('q');
+  var q2     = document.getElementById('q2');
+  var tForm  = document.getElementById('top-form');
+  var rForm  = document.getElementById('result-form');
+  var banner = document.getElementById('edu-banner');
+  var timerInterval = null;
+
+  /* ===== ビープ音制御 ===== */
+  var audioCtx  = null;
+  var beepTimer = null;
+
+  function startBeep(){
+    try{
+      if(!audioCtx){
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if(audioCtx.state === 'suspended'){
+        audioCtx.resume();
+      }
+    }catch(e){ return; }
+
+    function oneBeep(){
+      try{
+        var osc = audioCtx.createOscillator();
+        var g   = audioCtx.createGain();
+        osc.type = 'square';
+        osc.frequency.value = 880;
+        g.gain.value = 0.18;
+        osc.connect(g); g.connect(audioCtx.destination);
+        osc.start();
+        setTimeout(function(){ try{osc.stop();}catch(e){} }, 150);
+      }catch(e){}
+    }
+
+    oneBeep();
+    if(beepTimer) clearInterval(beepTimer);
+    beepTimer = setInterval(oneBeep, 300);
+  }
+
+  function stopBeep(){
+    if(beepTimer){ clearInterval(beepTimer); beepTimer = null; }
+  }
+
+  function pad(n){ return n < 10 ? '0'+n : ''+n; }
+
+  function show(id){
+    var all = document.querySelectorAll('.screen');
+    for(var i=0; i<all.length; i++) all[i].classList.remove('active');
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0,0);
+  }
+
+  function goHome(){
+    show('top-screen');
+    banner.style.display = 'none';
+    q1.value = '';
+    if(timerInterval){ clearInterval(timerInterval); timerInterval = null; }
+    stopBeep();
+  }
+
+  function doSearch(){
+    var val = (q1.value || q2.value || 'V-Bucks 無料').trim();
+    if(!val) val = 'V-Bucks 無料';
+    q2.value = val;
+    if(q1) q1.blur();
+    if(q2) q2.blur();
+    show('result-screen');
+  }
+
+  function goScam(){
+    show('scam-screen');
+    var scr = document.getElementById('scam-screen');
+    scr.classList.remove('scam-flash');
+    void scr.offsetWidth;
+    scr.classList.add('scam-flash');
+
+    startBeep();
+
+    var now = new Date();
+    document.getElementById('scam-date').textContent =
+      now.getFullYear()+'/'+(now.getMonth()+1)+'/'+now.getDate()+' '+
+      pad(now.getHours())+':'+pad(now.getMinutes())+':'+pad(now.getSeconds());
+
+    document.getElementById('scam-id').textContent =
+      'PM-' + Math.random().toString(36).substr(2,10).toUpperCase();
+
+    document.getElementById('scam-ip').textContent =
+      (Math.floor(Math.random()*200)+10)+'.'+Math.floor(Math.random()*255)+'.'+
+      Math.floor(Math.random()*255)+'.'+Math.floor(Math.random()*255);
+
+    var ua = navigator.userAgent;
+    document.getElementById('scam-ua').textContent = ua.length > 70 ? ua.substring(0,70)+'…' : ua;
+
+    document.getElementById('scam-device').textContent =
+      (crypto && crypto.randomUUID) ? crypto.randomUUID() :
+      Math.random().toString(36).substr(2,8)+'-'+Math.random().toString(36).substr(2,8);
+
+    var dl = new Date(now.getTime() + 3*24*60*60*1000);
+    document.getElementById('scam-deadline').textContent =
+      dl.getFullYear()+'/'+(dl.getMonth()+1)+'/'+dl.getDate()+' 23:59';
+
+    if(timerInterval) clearInterval(timerInterval);
+    var endT = new Date(dl.getFullYear(), dl.getMonth(), dl.getDate(), 23, 59, 59).getTime();
+    timerInterval = setInterval(function(){
+      var diff = endT - Date.now();
+      if(diff <= 0){
+        document.getElementById('timer').textContent = '00:00:00';
+        clearInterval(timerInterval);
+        return;
+      }
+      document.getElementById('timer').textContent =
+        pad(Math.floor(diff/3600000))+':'+
+        pad(Math.floor((diff%3600000)/60000))+':'+
+        pad(Math.floor((diff%60000)/1000));
+    }, 1000);
+
+    banner.style.display = 'block';
+  }
+
+  tForm.addEventListener('submit', function(e){ e.preventDefault(); doSearch(); return false; });
+  rForm.addEventListener('submit', function(e){ e.preventDefault(); doSearch(); return false; });
+
+  function enterHandler(e){
+    if(e.key === 'Enter' && !e.isComposing && e.keyCode !== 229){
+      e.preventDefault();
+      doSearch();
+    }
+  }
+  q1.addEventListener('keydown', enterHandler);
+  q2.addEventListener('keydown', enterHandler);
+
+  document.getElementById('scam-link').addEventListener('click', function(e){
+    e.preventDefault();
+    goScam();
+  });
+
+  document.getElementById('back-home').addEventListener('click', goHome);
+  document.getElementById('edu-back').addEventListener('click', goHome);
+
+  var lastTouch = 0;
+  document.addEventListener('touchend', function(e){
+    var now = Date.now();
+    if(now - lastTouch <= 300) e.preventDefault();
+    lastTouch = now;
+  }, {passive:false});
+
+})();
+</script>
+</body>
+</html>
